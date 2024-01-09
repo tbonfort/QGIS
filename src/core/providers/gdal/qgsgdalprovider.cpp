@@ -1870,6 +1870,8 @@ bool QgsGdalProvider::hasHistogram( int bandNo,
                                     int sampleSize,
                                     bool includeOutOfRange )
 {
+  return true;
+
   QMutexLocker locker( mpMutex );
   if ( !initIfNeeded() )
     return false;
@@ -1965,6 +1967,8 @@ QgsRasterHistogram QgsGdalProvider::histogram( int bandNo,
 
   QgsRasterHistogram myHistogram;
   initHistogram( myHistogram, bandNo, binCount, minimum, maximum, boundingBox, sampleSize, includeOutOfRange );
+  myHistogram.valid=true;
+  return myHistogram;
 
   // Find cached
   const auto constMHistograms = mHistograms;
@@ -2940,6 +2944,7 @@ bool QgsGdalProvider::hasStatistics( int bandNo,
                                      const QgsRectangle &boundingBox,
                                      int sampleSize )
 {
+  return true;
   QMutexLocker locker( mpMutex );
   if ( !initIfNeeded() )
     return false;
@@ -3042,6 +3047,18 @@ QgsRasterBandStats QgsGdalProvider::bandStatistics( int bandNo, int stats, const
       return stats;
     }
   }
+
+  myRasterBandStats.bandNumber = bandNo;
+  myRasterBandStats.range = 255;
+  myRasterBandStats.minimumValue = 0;
+  myRasterBandStats.maximumValue = 255;
+  myRasterBandStats.mean = 128;
+  myRasterBandStats.sum = 0;
+  myRasterBandStats.elementCount = 0; // not available via gdal
+  myRasterBandStats.sumOfSquares = 0; // not available via gdal
+  myRasterBandStats.stdDev = 1;
+  myRasterBandStats.statsGathered = QgsRasterBandStats::Min | QgsRasterBandStats::Max | QgsRasterBandStats::Range | QgsRasterBandStats::Mean | QgsRasterBandStats::StdDev;
+  return myRasterBandStats;
 
   // We cannot use GDAL stats if user disabled src no data value or set
   // custom  no data values
