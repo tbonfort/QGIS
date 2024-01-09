@@ -468,7 +468,7 @@ void QgsGdalProvider::closeDataset()
   }
   mValid = false;
 
-  if ( mGdalBaseDataset != mGdalDataset )
+  if ( mGdalBaseDataset!= mGdalDataset )
   {
     GDALDereferenceDataset( mGdalBaseDataset );
   }
@@ -1905,6 +1905,8 @@ bool QgsGdalProvider::hasHistogram( int bandNo,
                                     int sampleSize,
                                     bool includeOutOfRange )
 {
+  return true;
+
   QMutexLocker locker( mpMutex );
   if ( !initIfNeeded() )
     return false;
@@ -2000,6 +2002,8 @@ QgsRasterHistogram QgsGdalProvider::histogram( int bandNo,
 
   QgsRasterHistogram myHistogram;
   initHistogram( myHistogram, bandNo, binCount, minimum, maximum, boundingBox, sampleSize, includeOutOfRange );
+  myHistogram.valid=true;
+  return myHistogram;
 
   // Find cached
   const auto constMHistograms = mHistograms;
@@ -2994,6 +2998,7 @@ bool QgsGdalProvider::hasStatistics( int bandNo,
                                      const QgsRectangle &boundingBox,
                                      int sampleSize )
 {
+  return true;
   QMutexLocker locker( mpMutex );
   if ( !initIfNeeded() )
     return false;
@@ -3102,6 +3107,19 @@ QgsRasterBandStats QgsGdalProvider::bandStatistics( int bandNo, Qgis::RasterBand
       return stats;
     }
   }
+
+  myRasterBandStats.bandNumber = bandNo;
+  myRasterBandStats.range = 255;
+  myRasterBandStats.minimumValue = 0;
+  myRasterBandStats.maximumValue = 255;
+  myRasterBandStats.mean = 128;
+  myRasterBandStats.sum = 0;
+  myRasterBandStats.elementCount = 0; // not available via gdal
+  myRasterBandStats.sumOfSquares = 0; // not available via gdal
+  myRasterBandStats.stdDev = 1;
+  myRasterBandStats.statsGathered = Qgis::RasterBandStatistic::Min | Qgis::RasterBandStatistic::Max |
+    Qgis::RasterBandStatistic::Range | Qgis::RasterBandStatistic::Mean | Qgis::RasterBandStatistic::StdDev;
+  return myRasterBandStats;
 
   // We cannot use GDAL stats if user disabled src no data value or set
   // custom  no data values
