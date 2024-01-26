@@ -3594,14 +3594,14 @@ void QgsGdalProvider::initBaseDataset()
     {
       mGdalDataset =
         QgsGdalUtils::rpcAwareAutoCreateWarpedVrt( mGdalBaseDataset, nullptr, nullptr,
-            GRA_NearestNeighbour, 0.2, psWarpOptions.get() );
+            GRA_Bilinear, 0.2, psWarpOptions.get() );
       mGdalTransformerArg = QgsGdalUtils::rpcAwareCreateTransformer( mGdalBaseDataset );
     }
     else
     {
       mGdalDataset =
         GDALAutoCreateWarpedVRT( mGdalBaseDataset, nullptr, nullptr,
-                                 GRA_NearestNeighbour, 0.2, psWarpOptions.get() );
+                                 GRA_Bilinear, 0.2, psWarpOptions.get() );
     }
 
     if ( !mGdalDataset )
